@@ -137,3 +137,6 @@ ui-tests/.yarn/*
 ui-tests/.pnp.*
 
 data/
+raw_data/
+external/
+daps/
