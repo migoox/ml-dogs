@@ -54,8 +54,7 @@
 - analiza częstotliwości (**ZOSIA**):
     - zrzutowanie na oś częstotliwości (suma, avg, max, min) 
     - rozpiętość częstotliowości (max - min), max, min, median, avg
-- analgiczna anliza amplitudy jak częstotliwości (**JULKA**),
-- zrzutowanie na oś czasu (ale tylko kiedy uczestnicy czytają ten sam skrypt).
+- analiza amplitudy analogiczna do analizy częstotliwości (**JULKA**),
 - MFCC i LFCC (**MICHAL**)
     - [torch audio](https://pytorch.org/audio/main/tutorials/audio_feature_extractions_tutorial.html#mfcc)
     - [torch audio](https://pytorch.org/audio/main/tutorials/audio_feature_extractions_tutorial.html#lfcc)
