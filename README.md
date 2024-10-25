@@ -26,3 +26,9 @@ Alternatively you may install `ms-python.python` extension to automate this proc
 ```bash
 python src/main.py
 ```
+
+## Using `DapsExplorer`
+
+Before using the DAPS is convenient to put the downloaded data into the `data` folder in the root directory of the repository (it's gitignored).
+
+See `notebook/example/example.ipynb` and `src/main.py` for usage examples. 
