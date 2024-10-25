@@ -2,7 +2,7 @@
 lib/
 node_modules/
 *.egg-info/
-.ipynb_checkpoints
+.ipynb_checkpoints/
 *.tsbuildinfo
 
 # Created by https://www.gitignore.io/api/python
@@ -140,3 +140,4 @@ data/
 raw_data/
 external/
 daps/
+.venv/

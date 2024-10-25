@@ -8,6 +8,20 @@
 pip install -r src/requirements.txt
 ```
 
+### Using virtual environment
+Some linux distributions prohibit installing global python packages with pip
+to avoid overwriting the python packages shipped by the distro package manager.
+
+For that reason it may be helpful to use virtual python environment.
+
+```bash
+python -m  venv .venv
+source .venv/bin/activate
+pip install -r src/requirements.txt
+```
+
+Alternatively you may install `ms-python.python` extension to automate this process with VS Code.
+
 ## Run application
 ```bash
 python src/main.py

@@ -1,0 +1,5 @@
+matplotlib==3.9.2
+torch
+torchaudio
+PyQt6
+jupyter
