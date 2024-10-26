@@ -141,3 +141,6 @@ raw_data/
 external/
 daps/
 .venv/
+
+.idea/
+venv/
