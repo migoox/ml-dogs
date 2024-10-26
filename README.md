@@ -6,8 +6,8 @@
 
 ### Via VS Code
 
-0. Open VS Code in the root of the repository.
-1. Install the `ms-python.python` extension. 
+0. Install the `ms-python.python` extension and restart the VS Code.
+1. Open VS Code in the root of the repository.
 2. Use `Ctrl`+`Shift`+`P` and find `Python: Create Environment...`.
 3. Select `Venv`.
 4. Select the newest version of python executable on your machine.
