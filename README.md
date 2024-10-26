@@ -2,17 +2,34 @@
  
 > ⚠ Make sure the audio file is mono (single channel) and in `.wav` format. 
 
-## Install dependencies
+## Prepare python virtual environment
 
-```bash
-pip install -r requirements.txt
-```
+### Via VS Code
 
-### Using virtual environment
-Some linux distributions prohibit installing global python packages with pip
-to avoid overwriting the python packages shipped by the distro package manager.
+0. Open VS Code in the root of the repository.
+1. Install the `ms-python.python` extension. 
+2. Use `Ctrl`+`Shift`+`P` and find `Python: Create Environment...`.
+3. Select `Venv`.
+4. Select the newest version of python executable on your machine.
+5. Select `requirements.txt`.
+6. Click `OK`.
 
-For that reason it may be helpful to use virtual python environment.
+VS Code will create a virtual environment in `.venv` and download all of the required packages automatically.
+
+### Via PyCharm
+
+0. Open the PyCharm in the root of the repository.
+1. You will be prompted with a `Creating Virtual Environment` dialog box.
+2. Select the newest base interpreter.
+3. (Optional) You may rename the `venv` to `.venv` if you want to have compatibility between VS Code and PyCharm.
+4. Click `OK`.
+
+PyCharm will create a virtual environment in `venv` (or `.venv`) and download all of the required packages automatically.
+
+### Via terminal
+Navigate to the root of the repository first, then run the following commands.
+
+On Linux and MacOS:
 
 ```bash
 python -m  venv .venv
@@ -20,15 +37,34 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-Alternatively you may install `ms-python.python` extension to automate this process with VS Code.
+On Windows (CMD):
+
+```bash
+python -m  venv .venv
+.venv\Scripts\activate.bat
+pip install -r requirements.txt
+```
+
+On Windows (Powershell):
+
+```bash
+python -m  venv .venv
+.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+```
 
 ## Run application
+Enter the virtual environment first if you are using the terminal (note that PyCharm and VS Code will do that automatically
+in their integrated terminals). Then run the application
+
 ```bash
 python src/main.py
 ```
 
-## Using `DapsExplorer`
+## Development
 
-Before using the DAPS is convenient to put the downloaded data into the `data` folder in the root directory of the repository (it's gitignored).
+### Using `DapsExplorer`
 
-See `notebook/data_analysis/example/example.ipynb` and `src/main.py` for usage examples. 
+Before using the DAPS, it's convenient to put the downloaded data into the `data` folder in the root directory of the repository (it's gitignored).
+
+See `notebook/data_analysis/example/example.ipynb` and `src/main.py` for `DapsExplorer` usage examples. 
