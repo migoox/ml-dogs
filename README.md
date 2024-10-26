@@ -6,23 +6,23 @@
 
 ### Via VS Code
 
-0. Install the `ms-python.python` extension and restart the VS Code.
-1. Open VS Code in the root of the repository.
-2. Use `Ctrl`+`Shift`+`P` and find `Python: Create Environment...`.
-3. Select `Venv`.
-4. Select the newest version of python executable on your machine.
-5. Select `requirements.txt`.
-6. Click `OK`.
+1. Install the `ms-python.python` extension and restart the VS Code.
+2. Open VS Code in the root of the repository.
+3. Use `Ctrl`+`Shift`+`P` and find `Python: Create Environment...`.
+4. Select `Venv`.
+5. Select the newest version of python executable on your machine.
+6. Select `requirements.txt`.
+7. Click `OK`.
 
 VS Code will create a virtual environment in `.venv` and download all of the required packages automatically.
 
 ### Via PyCharm
 
-0. Open the PyCharm in the root of the repository.
-1. You will be prompted with a `Creating Virtual Environment` dialog box.
-2. Select the newest base interpreter.
-3. (Optional) You may rename the `venv` to `.venv` if you want to have compatibility between VS Code and PyCharm.
-4. Click `OK`.
+1. Open the PyCharm in the root of the repository.
+2. You will be prompted with a `Creating Virtual Environment` dialog box.
+3. Select the newest base interpreter.
+4. (Optional) You may rename the `venv` to `.venv` if you want to have compatibility between VS Code and PyCharm.
+5. Click `OK`.
 
 PyCharm will create a virtual environment in `venv` (or `.venv`) and download all of the required packages automatically.
 
