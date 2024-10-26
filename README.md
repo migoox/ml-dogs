@@ -5,7 +5,7 @@
 ## Install dependencies
 
 ```bash
-pip install -r src/requirements.txt
+pip install -r requirements.txt
 ```
 
 ### Using virtual environment
@@ -17,7 +17,7 @@ For that reason it may be helpful to use virtual python environment.
 ```bash
 python -m  venv .venv
 source .venv/bin/activate
-pip install -r src/requirements.txt
+pip install -r requirements.txt
 ```
 
 Alternatively you may install `ms-python.python` extension to automate this process with VS Code.
@@ -31,4 +31,4 @@ python src/main.py
 
 Before using the DAPS is convenient to put the downloaded data into the `data` folder in the root directory of the repository (it's gitignored).
 
-See `notebook/example/example.ipynb` and `src/main.py` for usage examples. 
+See `notebook/data_analysis/example/example.ipynb` and `src/main.py` for usage examples. 
