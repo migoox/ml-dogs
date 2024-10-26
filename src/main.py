@@ -1,8 +1,11 @@
+import os
 import matplotlib.pyplot as plt
 from utils.daps_explorer import DapsExplorer
 
+dir_path = os.path.dirname(os.path.realpath(__file__))
+
 def daps_expl_use_case_example_1():
-    root = DapsExplorer("./data/daps/") # DAPS dataset path relative to the current working directory
+    root = DapsExplorer(f"{dir_path}/../data/daps/") # DAPS dataset path relative to the current working directory
 
     dev_sc1 = root['device']['ipad']['balcony1']['script1'] # order doesn't matter
 
@@ -21,7 +24,7 @@ def daps_expl_use_case_example_1():
 
 
 def daps_expl_use_case_example_2():
-    root = DapsExplorer("./data/daps/")
+    root = DapsExplorer(f"{dir_path}/../data/daps/")
 
     speakers = DapsExplorer.get_speakers(gender=True)
 
@@ -50,7 +53,7 @@ def daps_expl_use_case_example_2():
 
 
 def daps_expl_use_case_example_3():
-    root = DapsExplorer("./data/daps/")
+    root = DapsExplorer(f"{dir_path}/../data/daps/")
 
     n_ffts = [512, 1024, 2048, 4096]
 
