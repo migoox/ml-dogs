@@ -3,3 +3,4 @@ torch
 torchaudio
 PyQt6
 jupyter
+PySoundFile
