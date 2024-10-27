@@ -44,6 +44,7 @@ class DapsRouteNodeType(Enum):
     Script = 5
 
 class DapsExplorer:
+    @staticmethod
     def get_recording_types() -> list[str]:
         """
         The DAPS dataset contains 4 types of recordings:
@@ -63,6 +64,7 @@ class DapsExplorer:
             'device',
         ]
 
+    @staticmethod
     def get_devices() -> list[str]:
         """
         Returns:
@@ -75,6 +77,7 @@ class DapsExplorer:
             'iphone',
         ]
 
+    @staticmethod
     def get_speakers(gender: bool = None, sp_class: bool = None) -> list[str]:
         """
         Retrieves a list of speaker identifiers based on specified filters for gender and speaker class.
@@ -113,6 +116,7 @@ class DapsExplorer:
 
         return result 
 
+    @staticmethod
     def get_surroundings() -> list[str]:
         """
         Returns:
@@ -130,6 +134,7 @@ class DapsExplorer:
             'confroom1',
         ]
 
+    @staticmethod
     def get_scripts() -> list[str]:
         """
         Returns:
