@@ -64,3 +64,15 @@
     - Mamy rozpoznawać czy głos należy do osoby z zadanego zbioru.
     - Czy to oznacza, że potrzebujemy klasy dla każdej osoby z zadanego zbioru i jednej dodatkowej klasy dla przypadku kiedy głos nie należy do żadnej z nich?
 
+### 30.10.24
+- Zmiana amplitudy na decybele oraz binów na częstotliwość i czas (MICHAŁ)
+- Stworzenie sieci i którą wytrenujemy na zbiorze (JULKA I ZOSIA)
+- Napisać skrypt siekający dane na 2 sekundy i zapisujący je jako png (MICHAŁ)
+- Utworzyć zbiór danych testowych (MARCIN)
+Pamiętać że nasz zbiór danych jest niezbalansowany,
+  - Znaleźć jaki jest optymalny podział procentowy na validation, train i test sety,
+  - Każdy speaker MUSI znaleźć się w każdym secie,
+  - Powinny być szumy, które są TYLKO w testowym,
+  - Powinny być skrypty, które są TYLKO w testowym,
+  - To ma być precyzyjnie opisany podział ale na razie bez skryptu pythonowego.
+
