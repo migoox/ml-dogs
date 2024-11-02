@@ -49,8 +49,10 @@ class DatasetCreator:
     @staticmethod
     def save_image(directory: str, name: str, image: Image.Image):
         image.save(os.path.join(directory, name))
+    
+    def export_dataset(self, n_fft=1024, interval_duration: float = 2, multithreading=True) -> tuple[int, int]:
+        """Returns image width and height."""
 
-    def export_dataset(self, n_fft=1024, interval_duration: float = 2, multithreading=True):
         print("DatasetCreator: Exporting the dataset with the following parameters:")
         print(f"    n_fft={n_fft}")
         print(f"    interval_duration={interval_duration}s")
@@ -67,6 +69,9 @@ class DatasetCreator:
             else ("validation" if self.dataset_type == DatasetType.Validation else "test")
         )
         files_count = len(self.class0) + len(self.class1)
+        print("Image properties:")
+        print(f"    width={img_width}px")
+        print(f"    height={img_height}px")
 
         os.makedirs(os.path.join(self.dataset_path, dataset_type_name, "0"), exist_ok=True)
         os.makedirs(os.path.join(self.dataset_path, dataset_type_name, "1"), exist_ok=True)
@@ -114,3 +119,5 @@ class DatasetCreator:
         end_time = time.time()
         elapsed_time = end_time - start_time
         print(f"Dataset has been exported. Elapsed time: {elapsed_time}s.")
+
+        return img_width, img_height
