@@ -10,6 +10,7 @@ import torchaudio
 from torchaudio import transforms
 import random
 import itertools
+from typing import Optional
 
 def power_to_db(S, ref=1.0, amin=1e-10, top_db=80.0):
     """
@@ -223,12 +224,17 @@ class DapsExplorer:
         return device_to_surrounding[device]
         
     @staticmethod
-    def get_data_set(type: DataSetType) -> list['DapsExplorer']:
+    def get_data_set(type: DataSetType, sp_class: Optional[bool] = None) -> list['DapsExplorer']:
         """
         Retrieves either the training, validation or test data set based on the provided parameter.
 
         Parameters:
             type (DataSetType): identifies portion of the data set: training, validation or test. 
+
+            sp_class (bool, optional): Filters speakers by class.
+                                    - True: returns only Class 1 speakers.
+                                    - False: returns only Class 0 speakers.
+                                    - None: includes both Class 0 and Class 1 speakers (no class filter).
 
         Returns:
             Data set represented as a list of DapsExplorers.
@@ -242,7 +248,7 @@ class DapsExplorer:
         
         script_speaker_rectype_lists = [
             DapsExplorer.get_scripts_by_data_set_type(type),
-            DapsExplorer.get_speakers(),
+            DapsExplorer.get_speakers(sp_class=sp_class),
             DapsExplorer.get_recording_types(),
         ]
 

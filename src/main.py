@@ -103,7 +103,7 @@ def dataset_creator_usage_example():
     
 def daps_expl_use_case_example_4():
     for type in DataSetType:
-        set = DapsExplorer.get_data_set(type)    
+        set = DapsExplorer.get_data_set(type, sp_class=False)    
         print(type.name, len(set))
 
 
