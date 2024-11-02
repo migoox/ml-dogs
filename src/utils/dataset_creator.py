@@ -104,6 +104,9 @@ class DatasetCreator:
                     interval_duration=interval_duration, normalize=True, specgram_transform=specgram_transform
                 )
 
+                # TODO: DELETE
+                specgrams = [specgrams[len(specgrams) / 2]]
+
                 if multithreading:
                     futures.append(executor.submit(thread_work, specgrams, file_name, file_ind))
                 else:
