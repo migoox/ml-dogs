@@ -1,25 +1,27 @@
 import os
 import matplotlib.pyplot as plt
+import torch
+import torchaudio
 from utils.daps_explorer import DapsExplorer
+from utils.dataset_creator import DatasetCreator, DatasetType
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
+
 
 def daps_expl_use_case_example_1():
     root = DapsExplorer(os.path.join(dir_path, "..", "data", "daps"))
 
-    dev_sc1 = root['device']['ipad']['balcony1']['script1'] # order doesn't matter
+    dev_sc1 = root["device"]["ipad"]["balcony1"]["script1"]  # order doesn't matter
 
-    wavefrom, sample_rate = dev_sc1['f1'].load_wav()
-    print(sample_rate)
-
-    time_bins, freq_bins, specgram = dev_sc1['f1'].load_specgram(1024)
+    specgram = dev_sc1["f1"].load_specgram_tensor()
+    time_bins, freq_bins  = DapsExplorer.get_freq_and_time_bins(specgram)
 
     plt.figure(figsize=(30, 4))
     plt.pcolormesh(time_bins, freq_bins, specgram)
-    plt.colorbar(label='Amplitude')
-    plt.xlabel('Time')
-    plt.ylabel('Frequency')
-    plt.title('Spectrogram f1')
+    plt.colorbar(label="Amplitude")
+    plt.xlabel("Time")
+    plt.ylabel("Frequency")
+    plt.title("Spectrogram f1")
     plt.show()
 
 
@@ -28,7 +30,7 @@ def daps_expl_use_case_example_2():
 
     speakers = DapsExplorer.get_speakers(gender=True)
 
-    cl_sc1 = root['clean']['script1']
+    cl_sc1 = root["clean"]["script1"]
 
     cols = 5
     rows = 2
@@ -36,18 +38,19 @@ def daps_expl_use_case_example_2():
     axes = axes.flatten()
 
     for i, speaker in enumerate(speakers):
-        time_bins, freq_bins, specgram = cl_sc1[speaker].load_specgram()
-        
+        specgram = cl_sc1[speaker].load_specgram_tensor()
+        time_bins, freq_bins  = DapsExplorer.get_freq_and_time_bins(specgram)
+
         ax = axes[i]
-        pcm = ax.pcolormesh(time_bins, freq_bins, specgram, shading='auto')
-        fig.colorbar(pcm, ax=ax, label='Amplitude')
-        ax.set_xlabel('Time')
-        ax.set_ylabel('Frequency')
-        ax.set_title(f'Spectrogram for Speaker {speaker}')
-    
+        pcm = ax.pcolormesh(time_bins, freq_bins, specgram, shading="auto")
+        fig.colorbar(pcm, ax=ax, label="Amplitude")
+        ax.set_xlabel("Time")
+        ax.set_ylabel("Frequency")
+        ax.set_title(f"Spectrogram for Speaker {speaker}")
+
     for j in range(i + 1, len(axes)):
-        axes[j].axis('off')
-    
+        axes[j].axis("off")
+
     plt.tight_layout()
     plt.show()
 
@@ -57,7 +60,7 @@ def daps_expl_use_case_example_3():
 
     n_ffts = [512, 1024, 2048, 4096]
 
-    cl_sc1 = root['clean']['script1']
+    cl_sc1 = root["clean"]["script1"]
 
     cols = 2
     rows = 2
@@ -65,20 +68,40 @@ def daps_expl_use_case_example_3():
     axes = axes.flatten()
 
     for i, n_fft in enumerate(n_ffts):
-        time_bins, freq_bins, specgram = cl_sc1['f1'].load_specgram(n_fft)
-        
+        specgram = cl_sc1["f1"].load_specgram_tensor(n_fft)
+        time_bins, freq_bins  = DapsExplorer.get_freq_and_time_bins(specgram)
+
         ax = axes[i]
-        pcm = ax.pcolormesh(time_bins, freq_bins, specgram, shading='auto')
-        fig.colorbar(pcm, ax=ax, label='Amplitude')
-        ax.set_xlabel('Time')
-        ax.set_ylabel('Frequency')
-        ax.set_title(f'Spectrogram for Speaker f1 with n_fft={n_fft}')
-    
+        pcm = ax.pcolormesh(time_bins, freq_bins, specgram, shading="auto")
+        fig.colorbar(pcm, ax=ax, label="Amplitude")
+        ax.set_xlabel("Time")
+        ax.set_ylabel("Frequency")
+        ax.set_title(f"Spectrogram for Speaker f1 with n_fft={n_fft}")
+
     for j in range(i + 1, len(axes)):
-        axes[j].axis('off')
-    
+        axes[j].axis("off")
+
     plt.tight_layout()
     plt.show()
 
+def dataset_creator_usage_example():
+    root = DapsExplorer(os.path.join(dir_path, "..", "data", "daps"))
+
+    dc = DatasetCreator(
+        class0=[
+            root["device"]["ipad"]["office1"]["script1"]["f1"],
+            root["device"]["ipad"]["office1"]["script1"]["f2"],
+            root["device"]["ipad"]["office1"]["script1"]["f3"],
+        ],
+        class1=[
+            root["device"]["ipad"]["office1"]["script2"]["f1"],
+            root["device"]["ipad"]["office1"]["script2"]["f2"],
+            root["device"]["ipad"]["office1"]["script2"]["f3"],
+        ],
+        dataset_path=os.path.join(dir_path, "..", "dataset"),
+        dataset_type=DatasetType.Train,
+    )
+    dc.export_dataset()
+    
 if __name__ == "__main__":
-    daps_expl_use_case_example_3() 
+    dataset_creator_usage_example()

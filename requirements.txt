@@ -4,3 +4,4 @@ torchaudio
 PyQt6
 jupyter
 PySoundFile
+pillow
