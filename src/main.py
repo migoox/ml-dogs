@@ -1,9 +1,7 @@
 import os
 import matplotlib.pyplot as plt
-import torch
-import torchaudio
-from utils.daps_explorer import DapsExplorer
-from utils.dataset_creator import DatasetCreator, DatasetType
+from utils.daps_explorer import DapsExplorer, DataSetType
+from utils.dataset_creator import DatasetCreator
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -99,9 +97,15 @@ def dataset_creator_usage_example():
             root["device"]["ipad"]["office1"]["script2"]["f3"],
         ],
         dataset_path=os.path.join(dir_path, "..", "dataset"),
-        dataset_type=DatasetType.Train,
+        dataset_type=DataSetType.Training,
     )
     dc.export_dataset()
     
+def daps_expl_use_case_example_4():
+    for type in DataSetType:
+        set = DapsExplorer.get_data_set(type)    
+        print(type.name, len(set))
+
+
 if __name__ == "__main__":
     dataset_creator_usage_example()

@@ -4,22 +4,15 @@ import time
 import numpy as np
 import torch
 from torch import Tensor
-from utils.daps_explorer import DapsExplorer
+from utils.daps_explorer import DapsExplorer, DataSetType
 from torchaudio import transforms
 from PIL import Image, ImageOps
 import matplotlib.pyplot as plt
 from concurrent.futures import ThreadPoolExecutor
 
-
-class DatasetType(Enum):
-    Train = 1
-    Validation = 2
-    Test = 3
-
-
 class DatasetCreator:
     def __init__(
-        self, class0: list[DapsExplorer], class1: list[DapsExplorer], dataset_path: str, dataset_type: DatasetType
+        self, class0: list[DapsExplorer], class1: list[DapsExplorer], dataset_path: str, dataset_type: DataSetType
     ):
         self.class0 = class0
         self.class1 = class1
@@ -65,8 +58,8 @@ class DatasetCreator:
         img_height = DapsExplorer.get_freq_bins_len(n_fft=n_fft)
         dataset_type_name = (
             "train"
-            if self.dataset_type == DatasetType.Train
-            else ("validation" if self.dataset_type == DatasetType.Validation else "test")
+            if self.dataset_type == DataSetType.Training
+            else ("validation" if self.dataset_type == DataSetType.Validation else "test")
         )
         files_count = len(self.class0) + len(self.class1)
         print("Image properties:")
@@ -105,7 +98,7 @@ class DatasetCreator:
                 )
 
                 # TODO: DELETE
-                specgrams = [specgrams[len(specgrams) / 2]]
+                specgrams = [specgrams[int(len(specgrams) / 2)]]
 
                 if multithreading:
                     futures.append(executor.submit(thread_work, specgrams, file_name, file_ind))

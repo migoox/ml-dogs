@@ -8,7 +8,36 @@ import torch
 import os
 import torchaudio
 from torchaudio import transforms
+import random
+import itertools
 
+def power_to_db(S, ref=1.0, amin=1e-10, top_db=80.0):
+    """
+    Convert a power spectrogram (amplitude squared) to decibel (dB) units.
+
+    Parameters:
+        S (torch.Tensor): Input power spectrogram tensor.
+        ref (float or callable): Reference value for scaling. If callable, computes ref(S).
+        amin (float): Minimum threshold for S to avoid log of zero.
+        top_db (float): Threshold in dB. Values lower than (max_dB - top_db) are set to (max_dB - top_db).
+
+    Returns:
+        torch.Tensor: The dB-scaled spectrogram tensor.
+    """
+    S = torch.maximum(S, torch.tensor(amin, dtype=S.dtype))
+
+    if callable(ref):
+        ref_value = ref(S)
+    else:
+        ref_value = ref
+
+    S_db = 10.0 * torch.log10(S / ref_value)
+
+    if top_db is not None:
+        max_db = torch.max(S_db)
+        S_db = torch.maximum(S_db, max_db - top_db)
+
+    return S_db
 
 class DapsRouteNodeType(Enum):
     Device = 1
@@ -17,6 +46,10 @@ class DapsRouteNodeType(Enum):
     Speaker = 4
     Script = 5
 
+class DataSetType(Enum):
+    Training = 1
+    Validation = 2
+    Test = 3
 
 class DapsExplorer:
     
@@ -124,6 +157,112 @@ class DapsExplorer:
             "script4",
             "script5",
         ]
+
+    @staticmethod
+    def get_scripts_by_data_set_type(type: DataSetType) -> list[str]:
+        """
+        Retrieves script keys used by the chosen data set type.
+
+        Parameters:
+            type (DataSetType): identifies portion of the data set: training, validation or test. 
+
+        Returns:
+            List of scripts keys making up the chosen set.
+        """
+        scripts = {
+            DataSetType.Training: [
+                'script1',
+                'script2',
+                'script3',
+                'script5',
+            ],
+            DataSetType.Validation: [
+                'script4',
+            ],
+            DataSetType.Test: [
+                'script4',
+            ],
+        }
+
+        return scripts[type]
+
+    @staticmethod
+    def get_surroundings_by_device(device: str) -> list[str]:
+        """
+        Retrieves surroundings available for the chosen device.
+
+        Parameters:
+            device (str): identifies the device between 'ipad', 'ipadflat' and 'iphone'. 
+
+        Returns:
+            List of surroundings avaialable for the chosen device.
+        """
+        if device not in DapsExplorer.get_devices():
+            raise KeyError(f"Provided key '{device}' is invalid in the DAPS dataset.")
+
+        device_to_surrounding = {
+            'ipad': [
+                'balcony1',
+                'bedroom1',
+                'confroom1',
+                'confroom2',
+                'livingroom1',
+                'office1',
+                'office2',
+            ],
+            'ipadflat': [
+                'confroom1',
+                'office1',
+            ],
+            'iphone': [
+                'balcony1',
+                'bedroom1',
+                'livingroom1',
+            ]
+        }
+        return device_to_surrounding[device]
+        
+    @staticmethod
+    def get_data_set(type: DataSetType) -> list['DapsExplorer']:
+        """
+        Retrieves either the training, validation or test data set based on the provided parameter.
+
+        Parameters:
+            type (DataSetType): identifies portion of the data set: training, validation or test. 
+
+        Returns:
+            Data set represented as a list of DapsExplorers.
+        """
+        result = []
+
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        root = DapsExplorer(os.path.join(dir_path, "..", "..", "data", "daps"))
+
+        random.seed(45)
+        
+        script_speaker_rectype_lists = [
+            DapsExplorer.get_scripts_by_data_set_type(type),
+            DapsExplorer.get_speakers(),
+            DapsExplorer.get_recording_types(),
+        ]
+
+        for element in itertools.product(*script_speaker_rectype_lists):
+            script = element[0]
+            speaker = element[1]
+            recording_type = element[2]
+
+            if recording_type == 'device':
+                for device in DapsExplorer.get_devices():
+                    for surrounding in DapsExplorer.get_surroundings_by_device(device):
+                        if type == DataSetType.Training or random.randint(2, 3) == type.value:
+                            file = root[recording_type][device][surrounding][script][speaker]
+                            result.append(file)
+            else:
+                if type == DataSetType.Training or random.randint(2, 3) == type.value:
+                    file = root[recording_type][script][speaker]
+                    result.append(file)
+                    
+        return result
 
     def __init__(self, daps_folder_path: str, route: list[str] = []):
         self.folder_path = daps_folder_path
