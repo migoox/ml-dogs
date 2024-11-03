@@ -2,6 +2,8 @@ import os
 import matplotlib.pyplot as plt
 from utils.daps_explorer import DapsExplorer, DataSetType
 from utils.dataset_creator import DatasetCreator
+from prepare_datasets import create_train_data, create_test_data
+from CNN import test, train
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -105,6 +107,15 @@ def daps_expl_use_case_example_4():
     for type in DataSetType:
         set = DapsExplorer.get_data_set(type, sp_class=False)    
         print(type.name, len(set))
+
+def prepare_datasets():
+    create_train_data()
+    create_test_data()
+def train_model():
+    train()
+
+def test_model():
+    test()
 
 
 if __name__ == "__main__":
