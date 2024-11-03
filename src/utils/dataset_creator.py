@@ -4,11 +4,12 @@ import time
 import numpy as np
 import torch
 from torch import Tensor
-from daps_explorer import DapsExplorer, DataSetType
 from torchaudio import transforms
 from PIL import Image, ImageOps
 import matplotlib.pyplot as plt
 from concurrent.futures import ThreadPoolExecutor
+
+from src.utils.daps_explorer import DapsExplorer, DataSetType
 
 
 class DatasetCreator:
