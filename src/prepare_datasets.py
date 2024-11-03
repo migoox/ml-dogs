@@ -1,10 +1,9 @@
 import os
 
 from src.utils.daps_explorer import DapsExplorer, DataSetType
-from src.utils.dataset_creator import DatasetCreator, DatasetType
+from src.utils.dataset_creator import DatasetCreator, DataSetType
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
-
 
 def get_data_groups(data_set_type: DataSetType):
     group_1_data = []
@@ -33,7 +32,7 @@ def create_train_data():
     dc = DatasetCreator(
         group0, group1,
         dataset_path=os.path.join(dir_path, "..", "dataset"),
-        dataset_type=DatasetType.Train,
+        dataset_type=DataSetType.Training,
     )
     dc.export_dataset()
 
@@ -43,7 +42,7 @@ def create_test_data():
     dc = DatasetCreator(
         group0, group1,
         dataset_path=os.path.join(dir_path, "..", "dataset"),
-        dataset_type=DatasetType.Test,
+        dataset_type=DataSetType.Test,
     )
     dc.export_dataset()
 
