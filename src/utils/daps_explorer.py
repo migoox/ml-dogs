@@ -173,12 +173,11 @@ class DapsExplorer:
         scripts = {
             DataSetType.Training: [
                 'script1',
-                'script2',
                 'script3',
                 'script5',
             ],
             DataSetType.Validation: [
-                'script4',
+                'script2',
             ],
             DataSetType.Test: [
                 'script4',
@@ -260,13 +259,11 @@ class DapsExplorer:
             if recording_type == 'device':
                 for device in DapsExplorer.get_devices():
                     for surrounding in DapsExplorer.get_surroundings_by_device(device):
-                        if type == DataSetType.Training or random.randint(2, 3) == type.value:
-                            file = root[recording_type][device][surrounding][script][speaker]
-                            result.append(file)
+                        file = root[recording_type][device][surrounding][script][speaker]
+                        result.append(file)
             else:
-                if type == DataSetType.Training or random.randint(2, 3) == type.value:
-                    file = root[recording_type][script][speaker]
-                    result.append(file)
+                file = root[recording_type][script][speaker]
+                result.append(file)
                     
         return result
 
