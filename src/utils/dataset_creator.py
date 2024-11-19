@@ -10,6 +10,9 @@ from PIL import Image, ImageOps
 import matplotlib.pyplot as plt
 from concurrent.futures import ThreadPoolExecutor
 
+from utils.daps_explorer import DapsExplorer, DataSetType
+
+
 class DatasetCreator:
     def __init__(
         self, class0: list[DapsExplorer], class1: list[DapsExplorer], dataset_path: str, dataset_type: DataSetType
@@ -43,7 +46,7 @@ class DatasetCreator:
     def save_image(directory: str, name: str, image: Image.Image):
         image.save(os.path.join(directory, name))
     
-    def export_dataset(self, n_fft=1024, interval_duration: float = 2, multithreading=True) -> tuple[int, int]:
+    def export_dataset(self, n_fft=1024, interval_duration: float = 2, n_mels=128, multithreading=True) -> tuple[int, int]:
         """Returns image width and height."""
 
         print("DatasetCreator: Exporting the dataset with the following parameters:")
@@ -53,9 +56,10 @@ class DatasetCreator:
         print(f"Class 0 recordings count: {len(self.class0)}")
         print(f"Class 1 recordings count: {len(self.class1)}")
 
-        specgram_transform = transforms.Spectrogram(n_fft=n_fft)
+        specgram_transform = transforms.MelSpectrogram(n_fft=n_fft, n_mels=n_mels, sample_rate=DapsExplorer.get_samplerate())
         img_width = DapsExplorer.get_time_bins_len(duration=interval_duration, n_fft=n_fft)
-        img_height = DapsExplorer.get_freq_bins_len(n_fft=n_fft)
+        img_height = n_mels
+
         dataset_type_name = (
             "train"
             if self.dataset_type == DataSetType.Training
