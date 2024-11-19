@@ -1,7 +1,9 @@
 matplotlib==3.9.2
 torch
 torchaudio
+torchvision
 PyQt6
 jupyter
 PySoundFile
 pillow
+scikit-learn

@@ -1,10 +1,9 @@
 import os
 import matplotlib.pyplot as plt
 from utils.daps_explorer import DapsExplorer, DataSetType
-from utils.dataset_creator import DatasetCreator
+from utils.dataset_creator import DatasetCreator, SpecgramsSilentFilter, SpecgramsRandomFilter
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
-
 
 def daps_expl_use_case_example_1():
     root = DapsExplorer(os.path.join(dir_path, "..", "data", "daps"))
@@ -96,8 +95,13 @@ def dataset_creator_usage_example():
             root["device"]["ipad"]["office1"]["script2"]["f2"],
             root["device"]["ipad"]["office1"]["script2"]["f3"],
         ],
-        dataset_path=os.path.join(dir_path, "..", "dataset"),
+        parent_path=os.path.join(dir_path, "..", "datasets"),
         dataset_type=DataSetType.Training,
+        specgram_filters=
+        [
+           SpecgramsSilentFilter(),
+           SpecgramsRandomFilter()
+        ]
     )
     dc.export_dataset()
     
