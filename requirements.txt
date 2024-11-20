@@ -7,3 +7,4 @@ jupyter
 PySoundFile
 pillow
 scikit-learn
+wandb
