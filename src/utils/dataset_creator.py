@@ -3,23 +3,44 @@ import os
 import time
 import numpy as np
 import torch
+import random
 from torch import Tensor
 from torchaudio import transforms
 from PIL import Image, ImageOps
 import matplotlib.pyplot as plt
+import shutil
 from concurrent.futures import ThreadPoolExecutor
 
-from src.utils.daps_explorer import DapsExplorer, DataSetType
+from utils.daps_explorer import DapsExplorer, DataSetType
 
+class SpecgramsSilentFilter:
+    def __init__(self, k: float = 0.75):
+        self.k = k
+        
+    def filter(self, specgrams: list[Tensor]) -> list[Tensor]:
+        # Compute average energy using vectorized operations
+        total_energy = torch.tensor([specgram.sum() for specgram in specgrams]).sum()
+        avg_energy = total_energy / len(specgrams)
+
+        # Filter spectrograms based on the average energy
+        specgrams_new = [specgram for specgram in specgrams if specgram.sum() >= self.k*avg_energy]
+
+        return specgrams_new
+
+class SpecgramsRandomFilter:
+    def filter(self, specgrams: list[Tensor]) -> list[Tensor]:
+        return [specgrams[random.randint(0, len(specgrams) - 1)]]
 
 class DatasetCreator:
     def __init__(
-        self, class0: list[DapsExplorer], class1: list[DapsExplorer], dataset_path: str, dataset_type: DataSetType
+        self, class0: list[DapsExplorer], class1: list[DapsExplorer], parent_path: str, dataset_type: DataSetType, 
+        specgram_filters: list
     ):
         self.class0 = class0
         self.class1 = class1
-        self.dataset_path = dataset_path
+        self.parent_path = parent_path
         self.dataset_type = dataset_type
+        self.specgram_filters = specgram_filters
 
     @staticmethod
     def get_image(specgram: Tensor, img_height: int, img_width: int) -> Image.Image:
@@ -45,19 +66,21 @@ class DatasetCreator:
     def save_image(directory: str, name: str, image: Image.Image):
         image.save(os.path.join(directory, name))
     
-    def export_dataset(self, n_fft=1024, interval_duration: float = 2, multithreading=True) -> tuple[int, int]:
+    def export_dataset(self, folder_name: str = "dataset", n_fft=1024, interval_duration: float = 2, n_mels=86, multithreading=True) -> tuple[int, int]:
         """Returns image width and height."""
 
         print("DatasetCreator: Exporting the dataset with the following parameters:")
         print(f"    n_fft={n_fft}")
+        print(f"    n_mels={n_mels}")
         print(f"    interval_duration={interval_duration}s")
         print(f"    multithreading={multithreading}")
         print(f"Class 0 recordings count: {len(self.class0)}")
         print(f"Class 1 recordings count: {len(self.class1)}")
 
-        specgram_transform = transforms.Spectrogram(n_fft=n_fft)
+        specgram_transform = transforms.MelSpectrogram(n_fft=n_fft, n_mels=n_mels, sample_rate=DapsExplorer.get_samplerate())
         img_width = DapsExplorer.get_time_bins_len(duration=interval_duration, n_fft=n_fft)
-        img_height = DapsExplorer.get_freq_bins_len(n_fft=n_fft)
+        img_height = n_mels
+
         dataset_type_name = (
             "train"
             if self.dataset_type == DataSetType.Training
@@ -68,8 +91,19 @@ class DatasetCreator:
         print(f"    width={img_width}px")
         print(f"    height={img_height}px")
 
-        os.makedirs(os.path.join(self.dataset_path, dataset_type_name, "0"), exist_ok=True)
-        os.makedirs(os.path.join(self.dataset_path, dataset_type_name, "1"), exist_ok=True)
+        class0_path = os.path.join(self.parent_path, folder_name, dataset_type_name, "0")
+        class1_path = os.path.join(self.parent_path, folder_name, dataset_type_name, "1")
+
+        if os.path.exists(class0_path):
+            print(f"Removing directory {class0_path}")
+            shutil.rmtree(class0_path)
+
+        if os.path.exists(class1_path):
+            print(f"Removing directory {class1_path}")
+            shutil.rmtree(class1_path)
+
+        os.makedirs(class0_path)
+        os.makedirs(class1_path)
 
         start_time = time.time()
         def thread_work(specgrams: list[torch.Tensor], file_name: str, file_ind: int):
@@ -81,7 +115,8 @@ class DatasetCreator:
                 image = DatasetCreator.get_image(s, img_height, img_width)
                 DatasetCreator.save_image(
                     os.path.join(
-                        self.dataset_path,
+                        self.parent_path,
+                        folder_name,
                         dataset_type_name,
                         class_name,
                     ),
@@ -99,8 +134,8 @@ class DatasetCreator:
                     interval_duration=interval_duration, normalize=True, specgram_transform=specgram_transform
                 )
 
-                # TODO: DELETE
-                specgrams = [specgrams[int(len(specgrams) / 2)]]
+                for filter in self.specgram_filters:
+                    specgrams = filter.filter(specgrams);
 
                 if multithreading:
                     futures.append(executor.submit(thread_work, specgrams, file_name, file_ind))
@@ -118,4 +153,5 @@ class DatasetCreator:
         elapsed_time = end_time - start_time
         print(f"Dataset has been exported. Elapsed time: {elapsed_time}s.")
 
-        return img_width, img_height
+        return img_height, img_width
+

@@ -1,6 +1,7 @@
 from collections import defaultdict
 import copy
 from enum import Enum
+import math
 import sys
 from typing import Optional
 from torch import Tensor
@@ -173,12 +174,11 @@ class DapsExplorer:
         scripts = {
             DataSetType.Training: [
                 'script1',
-                'script2',
                 'script3',
                 'script5',
             ],
             DataSetType.Validation: [
-                'script4',
+                'script2',
             ],
             DataSetType.Test: [
                 'script4',
@@ -260,13 +260,11 @@ class DapsExplorer:
             if recording_type == 'device':
                 for device in DapsExplorer.get_devices():
                     for surrounding in DapsExplorer.get_surroundings_by_device(device):
-                        if type == DataSetType.Training or random.randint(2, 3) == type.value:
-                            file = root[recording_type][device][surrounding][script][speaker]
-                            result.append(file)
+                        file = root[recording_type][device][surrounding][script][speaker]
+                        result.append(file)
             else:
-                if type == DataSetType.Training or random.randint(2, 3) == type.value:
-                    file = root[recording_type][script][speaker]
-                    result.append(file)
+                file = root[recording_type][script][speaker]
+                result.append(file)
                     
         return result
 
@@ -421,7 +419,7 @@ class DapsExplorer:
     @staticmethod
     def get_max_freq() -> int:
         """
-        All DAPS recordings have the same sample rate equal to 44,1kHz. The sample rate of 44.1 kHz technically allows 
+        All DAPS recordings have the same sample rate equal to 44.1kHz. The sample rate of 44.1 kHz technically allows 
         for audio at frequencies up to 22.05 kHz to be recorded.
 
         Returns:
@@ -433,10 +431,11 @@ class DapsExplorer:
     @staticmethod
     def get_freq_bins_len(n_fft: int) -> int:
         return int(DapsExplorer.get_max_freq() * n_fft / DapsExplorer.get_samplerate()) + 1
-    
+
     @staticmethod
     def get_time_bins_len(duration: float, n_fft: int) -> int:
-        return int(int(duration * DapsExplorer.get_samplerate()) / n_fft)
+        # from https://pytorch.org/audio/main/generated/torchaudio.transforms.MelSpectrogram.html
+        return int(duration * DapsExplorer.get_samplerate() / n_fft) + 1
 
     @staticmethod
     def get_freq_and_time_bins(specgram: Tensor) -> tuple[range, range]:
