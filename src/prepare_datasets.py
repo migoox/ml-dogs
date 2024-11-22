@@ -1,7 +1,7 @@
 import os
 
-from src.utils.daps_explorer import DapsExplorer, DataSetType
-from src.utils.dataset_creator import DatasetCreator, DataSetType
+from utils.daps_explorer import DapsExplorer, DataSetType
+from utils.dataset_creator import DatasetCreator, DataSetType
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -31,8 +31,9 @@ def create_train_data():
 
     dc = DatasetCreator(
         group0, group1,
-        dataset_path=os.path.join(dir_path, "..", "dataset"),
+        parent_path=os.path.join(dir_path, "..", "dataset"),
         dataset_type=DataSetType.Training,
+        specgram_filters=[]
     )
     dc.export_dataset()
 
@@ -41,8 +42,11 @@ def create_test_data():
     [group0, group1] = get_data_groups(DataSetType.Test)
     dc = DatasetCreator(
         group0, group1,
-        dataset_path=os.path.join(dir_path, "..", "dataset"),
+        parent_path=os.path.join(dir_path, "..", "dataset"),
         dataset_type=DataSetType.Test,
+        specgram_filters=
+        [
+        ]
     )
     dc.export_dataset()
 

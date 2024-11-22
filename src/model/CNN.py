@@ -62,61 +62,6 @@ class SpectrogramDataset(Dataset):
 
         return image, label
 
-
-def train():
-    transform = transforms.Compose([
-        transforms.Resize((513, 86)),  # Resize to the target spectrogram size (H, W)
-        transforms.ToTensor()
-    ])
-
-    # Hyperparameters
-    batch_size = 32
-    learning_rate = 0.001
-    num_epochs = 5
-
-    # Prepare Dataset and DataLoader
-    train_dataset = SpectrogramDataset(data_dir=os.path.join(dir_path, "..", "dataset", "train"),
-                                       transform=transform)
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-
-    model = Net()
-    criterion = nn.BCELoss()
-    optimizer = optim.Adam(model.parameters(), lr=learning_rate)
-
-    for epoch in range(num_epochs):
-        model.train()
-        running_loss = 0.0
-        all_labels = []
-        all_preds = []
-
-        for inputs, labels in train_loader:
-            # Reshape to match output size [batch_size, 1]
-            labels = labels.unsqueeze(1)
-
-            # Forward pass
-            outputs = model(inputs)
-            loss = criterion(outputs, labels)
-
-            # Backward pass and optimization
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
-
-            # Track loss and predictions for F1 score
-            running_loss += loss.item()
-            preds = (outputs > 0.5).float()  # Binary prediction with threshold 0.5
-            all_labels.extend(labels.numpy().flatten())
-            all_preds.extend(preds.detach().numpy().flatten())
-            print(f'[{epoch + 1}, {epoch + 1:5d}] loss: {running_loss:.3f}')
-
-        # Calculate macro-averaged F1 score
-        f1 = f1_score(all_labels, all_preds, average='macro')
-        print(f"Epoch {epoch + 1}/{num_epochs}, Loss: {running_loss / len(train_loader):.4f}, F1 Score: {f1:.4f}")
-
-    torch.save(model, "simple_cnn_full_model.pth")
-    print("Training complete.")
-
-
 def test():
     transform = transforms.Compose([
         transforms.Resize((513, 86)),  # Resize to the target spectrogram size (H, W)
