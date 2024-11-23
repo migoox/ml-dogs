@@ -2,6 +2,7 @@ import os
 import matplotlib.pyplot as plt
 from utils.daps_explorer import DapsExplorer, DataSetType
 from utils.dataset_creator import DatasetCreator, SpecgramsSilentFilter, SpecgramsRandomFilter
+from prepare_datasets import create_train_data, create_test_data
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -110,6 +111,10 @@ def daps_expl_use_case_example_4():
         set = DapsExplorer.get_data_set(type)    
         print(type.name, len(set))
 
+def prepare_datasets():
+    create_train_data()
+    create_test_data()
 
 if __name__ == "__main__":
+    prepare_datasets()
     dataset_creator_usage_example()
