@@ -1,7 +1,7 @@
 import os
 
 from utils.daps_explorer import DapsExplorer, DataSetType
-from utils.dataset_creator import DatasetCreator, DataSetType
+from utils.dataset_creator import DatasetCreator, DataSetType, SpecgramsSilentFilter
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -25,28 +25,37 @@ def get_data_groups(data_set_type: DataSetType):
 
     return group_0_data, group_1_data
 
-
-def create_train_data():
+def create_train_data(parent_path: str = "datasets", dataset_path: str = "dataset", filters: list = [ SpecgramsSilentFilter() ]):
     [group0, group1] = get_data_groups(DataSetType.Training)
-
     dc = DatasetCreator(
         group0, group1,
-        parent_path=os.path.join(dir_path, "..", "dataset"),
+        parent_path=os.path.join(dir_path, "..", parent_path),
         dataset_type=DataSetType.Training,
-        specgram_filters=[]
+        specgram_filters=filters
     )
-    dc.export_dataset()
+    dc.export_dataset(dataset_path)
 
-
-def create_test_data():
+def create_test_data(parent_path: str = "datasets", dataset_path: str = "dataset", filters: list = [  SpecgramsSilentFilter() ]):
     [group0, group1] = get_data_groups(DataSetType.Test)
     dc = DatasetCreator(
         group0, group1,
-        parent_path=os.path.join(dir_path, "..", "dataset"),
+        parent_path=os.path.join(dir_path, "..", parent_path),
         dataset_type=DataSetType.Test,
-        specgram_filters=
-        [
-        ]
+        specgram_filters=filters
     )
-    dc.export_dataset()
+    dc.export_dataset(dataset_path)
 
+def create_validation_data(parent_path: str = "datasets", dataset_path: str = "dataset", filters: list = [  SpecgramsSilentFilter() ]):
+    [group0, group1] = get_data_groups(DataSetType.Validation)
+    dc = DatasetCreator(
+        group0, group1,
+        parent_path=os.path.join(dir_path, "..", parent_path),
+        dataset_type=DataSetType.Validation,
+        specgram_filters=filters
+    )
+    dc.export_dataset(dataset_path)
+
+def create_datasets(parent_path: str = "datasets", dataset_path: str = "dataset", filters: list = [ SpecgramsSilentFilter() ]):
+    create_train_data(parent_path, dataset_path, filters)
+    create_validation_data(parent_path, dataset_path, filters)
+    create_test_data(parent_path, dataset_path, filters)

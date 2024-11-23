@@ -107,7 +107,8 @@ class DatasetCreator:
 
         start_time = time.time()
         def thread_work(specgrams: list[torch.Tensor], file_name: str, file_ind: int):
-            print(f"Processing [{file_ind + 1}/{files_count}]...")
+            for filter in self.specgram_filters:
+                specgrams = filter.filter(specgrams)
 
             for i, s in enumerate(specgrams):
                 class_name = "0" if file_ind < len(self.class0) else "1"
@@ -124,7 +125,8 @@ class DatasetCreator:
                     image,
                 )
 
-            print(f"Finished [{file_ind + 1}/{files_count}]")
+            print("\r", end="")
+            print(f"Finished [{file_ind + 1}/{files_count}]", end="")
 
         with ThreadPoolExecutor() as executor:
             futures = []
@@ -133,9 +135,6 @@ class DatasetCreator:
                 specgrams = c.load_specgram_splitted_tensors(
                     interval_duration=interval_duration, normalize=True, specgram_transform=specgram_transform
                 )
-
-                for filter in self.specgram_filters:
-                    specgrams = filter.filter(specgrams);
 
                 if multithreading:
                     futures.append(executor.submit(thread_work, specgrams, file_name, file_ind))

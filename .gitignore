@@ -149,3 +149,5 @@ dataset/
 datasets/
 
 wandb/
+
+*.pth
