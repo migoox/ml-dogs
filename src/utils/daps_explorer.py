@@ -283,7 +283,7 @@ class DapsExplorer:
 
         Note: The sample_rate may be accessed with `get_samplerate()`.
         """
-        waveform, _ = torchaudio.load(self.get_file_path())
+        waveform, _ = torchaudio.load(self.get_file_path(), normalize=True)
         return waveform
 
     def load_wav_splitted(self, interval_duration: float) -> list[Tensor]:
@@ -305,8 +305,7 @@ class DapsExplorer:
 
     def load_specgram_tensor(
         self,
-        normalize: bool = True,
-        specgram_transform: transforms.MelSpectrogram = transforms.MelSpectrogram(n_fft=1024),
+        specgram_transform: transforms.MelSpectrogram = transforms.MelSpectrogram(n_fft=1024, n_mels=86),
     ) -> Tensor:
         """
         Returns a spectrogram represented as a torch tensor. Amplitudes are expressed in dB.
@@ -315,23 +314,44 @@ class DapsExplorer:
         amp_transform = transforms.AmplitudeToDB(stype='power', top_db=80.0)
         s = amp_transform(specgram_transform(waveform)[0])
 
-        if normalize:
-            min_db = s.min()
-            max_db = s.max()
-            s = (s - min_db) / (max_db - min_db)
-
         return s
 
-    def load_specgram_splitted_tensors(
+    @staticmethod
+    def save_wav_from_specgram(file_path: str, specgram_db: Tensor, n_fft: int = 1024, n_mels: int = 86) -> list[str]:
+        specgram_amp = torchaudio.functional.DB_to_amplitude(specgram_db, ref=1.0, power=0.5)
+
+        inv_mel_transform = torchaudio.transforms.InverseMelScale(n_mels=n_mels, n_stft=int(n_fft // 2) + 1)
+        grifflim_transform = torchaudio.transforms.GriffinLim(n_fft=n_fft)
+
+        waveform = grifflim_transform(inv_mel_transform(specgram_amp))
+
+        # Ensure waveform is 2D (channels, time)
+        if waveform.dim() == 1:
+            waveform = waveform.unsqueeze(0)  # Add a channel dimension for mono audio
+        elif waveform.dim() == 2 and waveform.shape[0] > 1:
+            waveform = waveform.mean(dim=0, keepdim=True)  # Convert to mono if stereo
+
+        assert waveform.dim() == 2, f"Waveform must be 2D, but got shape {waveform.shape}"
+
+        torchaudio.save(
+            file_path,
+            waveform,
+            DapsExplorer.get_samplerate(),
+            encoding="PCM_S",
+            bits_per_sample=16
+        )
+
+    def load_specgram_split_tensors(
         self,
         interval_duration: float,
-        normalize: bool = True,
+        min_db: float,
+        max_db: float,
         specgram_transform: transforms.MelSpectrogram = transforms.MelSpectrogram(n_fft=1024),
     ) -> list[Tensor]:
         """
         Returns a spectrograms of provided interval represented as a torch tensor. Amplitudes are expressed in dB.
         """
-        s = self.load_specgram_tensor(normalize = normalize, specgram_transform = specgram_transform)
+        s = (self.load_specgram_tensor(specgram_transform = specgram_transform) - min_db) / (max_db - min_db)
         interval_length = DapsExplorer.get_time_bins_len(duration = interval_duration, n_fft=specgram_transform.n_fft)
 
         chunks: list[Tensor] = list()
@@ -340,7 +360,7 @@ class DapsExplorer:
             chunks.append(s[:, ind:ind + interval_length])
 
         return chunks
-    
+
     def get_file_name(self) -> str:
         """
         Returns the constructed DAPS file name, if the construction is not valid an error is thrown

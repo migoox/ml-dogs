@@ -128,12 +128,20 @@ class DatasetCreator:
             print("\r", end="")
             print(f"Finished [{file_ind + 1}/{files_count}]", end="")
 
+        min_db, max_db = (
+            min(specgram.min().item() for c in self.class0 + self.class1 for specgram in [c.load_specgram_tensor()]),
+            max(specgram.max().item() for c in self.class0 + self.class1 for specgram in [c.load_specgram_tensor()])
+        )
+
         with ThreadPoolExecutor() as executor:
             futures = []
             for file_ind, c in enumerate(self.class0 + self.class1):
                 file_name = c.get_file_name()
-                specgrams = c.load_specgram_splitted_tensors(
-                    interval_duration=interval_duration, normalize=True, specgram_transform=specgram_transform
+                specgrams = c.load_specgram_split_tensors(
+                    interval_duration=interval_duration, 
+                    min_db=min_db,
+                    max_db=max_db,
+                    specgram_transform=specgram_transform
                 )
 
                 if multithreading:
