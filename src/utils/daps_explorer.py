@@ -341,26 +341,39 @@ class DapsExplorer:
             bits_per_sample=16
         )
 
+    @staticmethod
+    def split_spectrogram(s: torch.Tensor, duration_seconds: float, n_fft: int = 1024) -> list[torch.Tensor]:
+        """
+        Splits a spectrogram tensor into 2-second segments.
+
+        Args:
+            s (torch.Tensor): The spectrogram tensor (Frequency x Time).
+            n_fft (int): FFT size used in MelSpectrogram (default: 1024).
+        
+        Returns:
+            List[torch.Tensor]: A list of 2-second spectrogram segments.
+        """
+        frame_duration = n_fft / DapsExplorer.get_samplerate()  / 2
+        frames_per_segment = int(2 / frame_duration)
+        num_segments = s.size(1) // frames_per_segment
+        segments = [
+            s[:, i * frames_per_segment:(i + 1) * frames_per_segment]
+            for i in range(num_segments)
+        ]
+        
+        return segments
+    
     def load_specgram_split_tensors(
         self,
-        interval_duration: float,
-        min_db: float,
-        max_db: float,
-        specgram_transform: transforms.MelSpectrogram = transforms.MelSpectrogram(n_fft=1024),
+        duration_seconds: float,
+        specgram_transform: transforms.MelSpectrogram = transforms.MelSpectrogram(n_fft=1024, n_mels=86),
     ) -> list[Tensor]:
         """
         Returns a spectrograms of provided interval represented as a torch tensor. Amplitudes are expressed in dB.
         """
-        s = (self.load_specgram_tensor(specgram_transform = specgram_transform) - min_db) / (max_db - min_db)
-        interval_length = DapsExplorer.get_time_bins_len(duration = interval_duration, n_fft=specgram_transform.n_fft)
-
-        chunks: list[Tensor] = list()
-        rlen = int(s.shape[1] / interval_length) * interval_length 
-        for ind in range(0, rlen, interval_length):
-            chunks.append(s[:, ind:ind + interval_length])
-
-        return chunks
-
+        return DapsExplorer.split_spectrogram(self.load_specgram_tensor(specgram_transform = specgram_transform), 
+                                              duration_seconds=duration_seconds, n_fft=specgram_transform.n_fft)
+    
     def get_file_name(self) -> str:
         """
         Returns the constructed DAPS file name, if the construction is not valid an error is thrown
@@ -455,7 +468,7 @@ class DapsExplorer:
     @staticmethod
     def get_time_bins_len(duration: float, n_fft: int) -> int:
         # from https://pytorch.org/audio/main/generated/torchaudio.transforms.MelSpectrogram.html
-        return int(duration * DapsExplorer.get_samplerate() / n_fft) + 1
+        return int(duration * DapsExplorer.get_samplerate() / (n_fft / 2)) + 1
 
     @staticmethod
     def get_freq_and_time_bins(specgram: Tensor) -> tuple[range, range]:
