@@ -14,7 +14,7 @@ from concurrent.futures import ThreadPoolExecutor
 from utils.daps_explorer import DapsExplorer, DataSetType
 
 class SpecgramsSilentFilter:
-    def __init__(self, k: float = 0.75):
+    def __init__(self, k: float = 1.75):
         self.k = k
         
     def filter(self, specgrams: list[Tensor]) -> list[Tensor]:
@@ -66,19 +66,19 @@ class DatasetCreator:
     def save_image(directory: str, name: str, image: Image.Image):
         image.save(os.path.join(directory, name))
     
-    def export_dataset(self, folder_name: str = "dataset", n_fft=1024, interval_duration: float = 2, n_mels=86, multithreading=True) -> tuple[int, int]:
+    def export_dataset(self, folder_name: str = "dataset", n_fft=1024, duration_seconds: float = 2, n_mels=86, multithreading=True) -> tuple[int, int]:
         """Returns image width and height."""
 
         print("DatasetCreator: Exporting the dataset with the following parameters:")
         print(f"    n_fft={n_fft}")
         print(f"    n_mels={n_mels}")
-        print(f"    interval_duration={interval_duration}s")
+        print(f"    duration_seconds={duration_seconds}s")
         print(f"    multithreading={multithreading}")
         print(f"Class 0 recordings count: {len(self.class0)}")
         print(f"Class 1 recordings count: {len(self.class1)}")
 
         specgram_transform = transforms.MelSpectrogram(n_fft=n_fft, n_mels=n_mels, sample_rate=DapsExplorer.get_samplerate())
-        img_width = DapsExplorer.get_time_bins_len(duration=interval_duration, n_fft=n_fft)
+        img_width = DapsExplorer.get_time_bins_len(duration=duration_seconds, n_fft=n_fft)
         img_height = n_mels
 
         dataset_type_name = (
@@ -128,13 +128,22 @@ class DatasetCreator:
             print("\r", end="")
             print(f"Finished [{file_ind + 1}/{files_count}]", end="")
 
+        min_db, max_db = (
+            min(specgram.min().item() for c in self.class0 + self.class1 for specgram in [c.load_specgram_tensor()]),
+            max(specgram.max().item() for c in self.class0 + self.class1 for specgram in [c.load_specgram_tensor()])
+        )
+
         with ThreadPoolExecutor() as executor:
             futures = []
             for file_ind, c in enumerate(self.class0 + self.class1):
                 file_name = c.get_file_name()
-                specgrams = c.load_specgram_splitted_tensors(
-                    interval_duration=interval_duration, normalize=True, specgram_transform=specgram_transform
+                specgrams = c.load_specgram_split_tensors(
+                    duration_seconds=duration_seconds, 
+                    specgram_transform=specgram_transform
                 )
+                
+                for i in range(0, len(specgrams)):
+                    specgrams[i] = (specgrams[i] - min_db) / (max_db - min_db)
 
                 if multithreading:
                     futures.append(executor.submit(thread_work, specgrams, file_name, file_ind))

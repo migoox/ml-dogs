@@ -1,8 +1,14 @@
 import os
 import matplotlib.pyplot as plt
+import numpy as np
+import torch
+import torchaudio
 from utils.daps_explorer import DapsExplorer, DataSetType
 from utils.dataset_creator import DatasetCreator, SpecgramsSilentFilter, SpecgramsRandomFilter
 from prepare_datasets import create_train_data, create_test_data
+from PIL import Image
+from torchaudio import transforms
+import torchvision.transforms as transforms2
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -101,20 +107,41 @@ def dataset_creator_usage_example():
         specgram_filters=
         [
            SpecgramsSilentFilter(),
-           SpecgramsRandomFilter()
+        #    SpecgramsRandomFilter()
         ]
     )
     dc.export_dataset()
     
 def daps_expl_use_case_example_4():
     for type in DataSetType:
-        set = DapsExplorer.get_data_set(type)    
+        set = DapsExplorer.get_data_set(type)
         print(type.name, len(set))
 
 def prepare_datasets():
     create_train_data()
     create_test_data()
 
+def data_loss_example():
+    root = DapsExplorer(os.path.join(dir_path, "..", "data", "daps"))
+    s = root["cleanraw"]["script1"]["f1"].load_specgram_split_tensors(2)[11]
+
+    # save wav file directly
+    DapsExplorer.save_wav_from_specgram("test_no_image.wav", s.squeeze())
+
+    # save to image
+    min_db = -40
+    max_db = 40
+    s = (s - min_db) / (max_db - min_db) # convert to [0,1]
+    DatasetCreator.save_image("", "test.png", DatasetCreator.get_image(s, 86, 173))
+
+    # load from image
+    image = Image.open("test.png")
+    transform = transforms2.ToTensor()
+
+    # save wav indirectly
+    s2 = transform(image)
+    s2 = s2 * (max_db - min_db) + min_db
+    DapsExplorer.save_wav_from_specgram("test_from_image.wav", s2.squeeze())
+
 if __name__ == "__main__":
-    prepare_datasets()
-    dataset_creator_usage_example()
+    data_loss_example()
